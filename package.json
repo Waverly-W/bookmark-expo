@@ -9,6 +9,7 @@
     "preview": "vite preview -c vite.popup.config.js"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
     "element-plus": "^2.4.3",
     "less": "^4.2.0",
     "mockjs": "^1.1.0",

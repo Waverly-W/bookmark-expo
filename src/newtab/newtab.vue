@@ -6,7 +6,11 @@
   <router-view />
 </template>
 
-<style lang="stylus">
-body
-  position relative
+<style lang="scss">
+::-webkit-scrollbar {
+  width: 0 !important;
+}
+::-webkit-scrollbar {
+  width: 0 !important;height: 0;
+}
 </style>
