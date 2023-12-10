@@ -70,8 +70,8 @@ const processBookmarks = (nodes) => {
 };
 
 
-const bookmarkCardMinWidth = 200;
-const bookmarkCardMaxWidth = 220;
+const bookmarkCardMinWidth = 260;
+const bookmarkCardMaxWidth = 280;
 const columnGap = 2; // 列之间的最小间隙
 // 定义一个响应式对象来存储布局信息
 const layout = reactive({

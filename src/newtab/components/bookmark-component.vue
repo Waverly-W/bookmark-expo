@@ -6,22 +6,23 @@
     <div class="bookmark-list">
       <div v-for="(item,index) in bookmarksData" :key="index" class="bookmark-item">
 
-        <el-space v-if="item.url">
+
+        <el-text v-if="item.url" class="bookmark-text"
+                 truncated
+                 style="mix-blend-mode: difference;color: white;"
+                 @click="locationToUrl(item.url)"
+
+        >
           <el-icon size="14px">
             <Link/>
           </el-icon>
-          <el-text class="bookmark-text" truncated style="mix-blend-mode: difference;color: white;" @click="locationToUrl(item.url)">
-            {{ item.title }}
-          </el-text>
-        </el-space>
-        <el-space v-else>
-          <el-icon size="14px">
-            <Folder/>
-          </el-icon>
-          <el-text class="bookmark-folder" truncated style="mix-blend-mode: difference;color: white;">
-            {{ item.title }}
-          </el-text>
-        </el-space>
+          {{ item.title }}
+        </el-text>
+
+
+        <sub-bookmark-component v-else :bookmarks-data="item.children" :title="item.title"
+                                :width="width-'20px'"></sub-bookmark-component>
+
       </div>
 
     </div>
@@ -31,6 +32,7 @@
 <script setup>
 import {ref} from 'vue';
 import {Folder, Link} from "@element-plus/icons-vue";
+import SubBookmarkComponent from "@/newtab/components/sub-bookmark-component.vue";
 
 const props = defineProps({
   title: "",
@@ -94,7 +96,9 @@ function locationToUrl(url) {
     overflow: scroll;
 
     .bookmark-item {
-      padding: 2px 4px;
+      height: auto;
+      padding: 2px 2px;
+      width: auto;
       transition: all 0.3s ease; /* 为下划线添加平滑过渡效果 */
 
 
