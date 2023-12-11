@@ -1,23 +1,28 @@
 <template>
   <div id="building">
     <div class="filter" ref="filter">
-
     </div>
   </div>
   <el-row :gutter="20">
     <el-col :span="18" :offset="3">
-
+      <el-row class="search-bar" justify="center">
+        <search-bar2 :bookmarks="bookmarksList"></search-bar2>
+      </el-row>
+      <el-row wrap class="single-bookmark" >
+        <div v-for="(item, index) in bookmarksBySingle" :key="index">
+          <bookmark-single :title="item.title" :url="item.url"></bookmark-single>
+        </div>
+      </el-row>
       <div ref="bookmarkContainerRef" class="box-wrapper" :style="{ columnCount: layout.columnCount}">
         <el-row wrap justify="space-between">
           <div v-for="(item, index) in bookmarksByFolder" :key="index" class="box-item">
-            <bookmark-component
+            <bookmark-component v-if="item.children"
                 :title="item.title"
                 :bookmarks-data="item.children"
                 :width="layout.cardWidth + 'px'"
             ></bookmark-component>
           </div>
         </el-row>
-
       </div>
 
     </el-col>
@@ -30,49 +35,47 @@
 import {ref, onMounted, reactive, onUnmounted} from 'vue';
 import {mockBookmarksData} from "@/newtab/views/home/mockBookmarksData.js";
 import BookmarkComponent from "@/newtab/components/bookmark-component.vue";
-
+import BookmarkSingle from "@/newtab/components/bookmark-single.vue";
+import SearchBar from "@/newtab/components/search-bar.vue";
+import SearchBar2 from "@/newtab/components/search-bar2.vue";
+const bookmarksAll = ref({});
 const bookmarksByFolder = ref({});
+const bookmarksBySingle = ref({});
 // 加载书签的函数
 const isChromeExtension = typeof chrome !== "undefined" && chrome.bookmarks;
 const loadBookmarks = () => {
   if (isChromeExtension) {
     // 使用真实的 Chrome API
     chrome.bookmarks.getTree((bookmarkTreeNodes) => {
-      console.info(bookmarkTreeNodes[0].children[0].children)
-      bookmarksByFolder.value = bookmarkTreeNodes[0].children[0].children;
+      bookmarksAll.value = bookmarkTreeNodes[0].children[0].children;
+      splitBookmarks(bookmarkTreeNodes[0].children[0].children);
     });
   } else {
-    // 使用模拟数据
-    bookmarksByFolder.value = mockBookmarks();
+    const mockData = mockBookmarksData;
+    bookmarksAll.value = mockData  // 使用模拟数
+    splitBookmarks(mockData);
   }
 };
 
-const mockBookmarks = () => {
-  return mockBookmarksData;
-};
-
-// 处理和转换书签数据的辅助函数
-const processBookmarks = (nodes) => {
-  let folderMap = {};
-  const traverseNodes = (node, parentTitle) => {
-    if (node.children) {
-      const folderTitle = node.title || parentTitle;
-      node.children.forEach(child => traverseNodes(child, folderTitle));
+const splitBookmarks = (bookmarksData) =>{
+  const folder = [];
+  const single = [];
+  for (let i = 0; i < bookmarksData.length; i++) {
+    if (bookmarksData[i].children && bookmarksData[i].children.length > 0) {
+      // 如果元素有children字段，则添加到withChildren中
+      folder.push(bookmarksData[i]);
     } else {
-      if (!folderMap[parentTitle]) {
-        folderMap[parentTitle] = [];
-      }
-      folderMap[parentTitle].push({id: node.id, title: node.title, url: node.url});
+      // 如果元素没有children字段，则添加到withoutChildren中
+      single.push(bookmarksData[i]);
     }
-  };
-  nodes.forEach(node => traverseNodes(node, ''));
-  return folderMap;
-};
-
+  }
+  bookmarksByFolder.value = folder;
+  bookmarksBySingle.value = single;
+}
 
 const bookmarkCardMinWidth = 260;
 const bookmarkCardMaxWidth = 280;
-const columnGap = 2; // 列之间的最小间隙
+const columnGap = 4; // 列之间的最小间隙
 // 定义一个响应式对象来存储布局信息
 const layout = reactive({
   containerWidth: 0,
@@ -83,10 +86,8 @@ const layout = reactive({
 const bookmarkContainerRef = ref(null);
 
 const calculateLayout = () => {
-  console.info(bookmarkContainerRef)
   if (bookmarkContainerRef.value) {
     const containerWidth = bookmarkContainerRef.value.offsetWidth;
-    console.info(containerWidth)
     let columnCount = Math.floor(containerWidth / (bookmarkCardMinWidth+columnGap));
     columnCount = Math.max(columnCount, 1); // 至少有一列
     let cardWidth = containerWidth / columnCount;
@@ -98,10 +99,26 @@ const calculateLayout = () => {
   }
 };
 
+const bookmarksList =ref([]);
+const findBookmarksWithoutChildren = (bookmarks) => {
+
+  for (let i = 0; i < bookmarks.length; i++) {
+    if (bookmarks[i].children && bookmarks[i].children.length > 0) {
+      // 如果书签有children字段，递归搜索其子项
+      findBookmarksWithoutChildren(bookmarks[i].children);
+    } else {
+      // 没有children字段，将书签添加到bookmarksList中
+      bookmarksList.value.push(bookmarks[i]);
+    }
+  }
+};
+
 onMounted(() => {
   loadBookmarks();
   calculateLayout();
   window.addEventListener('resize', calculateLayout); // 监听窗口大小变化
+  findBookmarksWithoutChildren(bookmarksAll.value)
+  // localStorage.setItem("bookmarks", bookmarksAll.value)
 });
 onUnmounted(() => {
   window.removeEventListener('resize', calculateLayout); // 组件卸载时移除监听器
@@ -140,18 +157,28 @@ onUnmounted(() => {
 .box-wrapper {
   width: 100%;
 }
-
+.single-bookmark{
+  //box-sizing: border-box;
+  //break-inside: avoid;
+  padding: 5px;
+}
 
 .box-item {
   box-sizing: border-box;
   break-inside: avoid;
-  padding: 10px;
+  padding: 5px;
 }
 
 .box-item > div {
   height: 100%;
   background: #4286F5;
   box-sizing: border-box;
+}
+
+.search-bar{
+  align-items: center;
+  align-content: center;
+  height: 100px;
 }
 
 </style>

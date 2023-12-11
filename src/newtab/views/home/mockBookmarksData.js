@@ -1,111 +1,105 @@
 export const mockBookmarksData = [
     {
-
-        "title": "\u5e38\u7528",
         "id": "",
-        "children": [
-            {
-                "id": "",
-                "title": "\u79d1\u6280\u8d44\u8baf | \u6e7e\u533a\u65e5\u62a5",
-                "url": "https://www.wanqu.co/"
-            },
-            {
-                "id": "",
-                "title": "\u8d44\u6e90\u5206\u4eab | zsxwz",
-                "url": "https://bbs.zsxwz.com/"
-            },
-            {
-                "id": "",
-                "title": "\u77e5\u8bc6\u5206\u4eab | \u77e5\u4e4e",
-                "url": "https://www.zhihu.com/"
-            },
-            {
-                "id": "",
-                "title": "\u79d1\u6280\u8d44\u8baf | \u5c11\u6570\u6d3e",
-                "url": "https://sspai.com/"
-            },
-            {
-                "id": "",
-                "title": "\u79d1\u6280\u8bba\u575b | V2EX",
-                "url": "https://www.v2ex.com/"
-            },
-            {
-                "id": "",
-                "title": "\u826f\u5fc3\u514d\u8d39\u89c6\u9891\u7f51\u7ad9 | \u4f4e\u7aef\u5f71\u89c6",
-                "url": "https://ddys.tv/"
-            },
-            {
-                "id": "",
-                "title": "\u56fd\u5185\u89c6\u9891\u7f51\u7ad9 | bilibili",
-                "url": "https://www.bilibili.com/"
-            },
-            {
-                "id": "",
-                "title": "\u4ee3\u7801\u6258\u7ba1\u5e73\u53f0 | GitHub",
-                "url": "https://github.com/"
-            },
-            {
-                "id": "",
-                "title": "\u8c37\u6b4c\u5b66\u672f | Google Scholar",
-                "url": "https://scholar.google.com/"
-            },
-            {
-                "id": "",
-                "title": "\u5728\u7ebfLATEX | Overleaf",
-                "url": "https://www.overleaf.com/project"
-            },
-            {
-                "id": "",
-                "title": "\u5728\u7ebf\u7ffb\u8bd1 | Google \u7ffb\u8bd1",
-                "url": "https://translate.google.com.hk/?hl=zh-CN&sourceid=cnhp"
-            },
-            {
-                "id": "",
-                "title": "\u901a\u8baf\u5de5\u5177 | Telegram",
-                "url": "https://web.telegram.org/k/"
-            },
-            {
-                "id": "",
-                "title": "\u7a0d\u540e\u9605\u8bfb | Pocket",
-                "url": "https://getpocket.com/zh/saves"
-            },
-            {
-                "id": "",
-                "title": "\u6587\u732e\u9605\u8bfb\u5668 | \u5c0f\u7eff\u9cb8",
-                "url": "https://www.xljsci.com/index/index/list"
-            },
-            {
-                "id": "",
-                "title": "\u8bba\u6587\u4e0b\u8f7d | Sci-Hub",
-                "url": "https://sci-hub.se/"
-            },
-            {
-                "id": "",
-                "title": "\u6253\u5b57\u7ec3\u4e60 | EdClub",
-                "url": "https://www.typingclub.com/sportal/"
-            },
-            {
-                "id": "",
-                "title": "\u5728\u7ebf\u9605\u8bfb\u5668 | Koodo",
-                "url": "http://192.3.107.201:12345/#/manager/home"
-            },
-            {
-                "id": "",
-                "title": "\u79d1\u6280\u8d44\u8baf\u6570\u5b57\u5c3e\u5df4",
-                "url": "https://www.dgtle.com/"
-            },
-            {
-                "id": "",
-                "title": "\u79d1\u6280\u8d44\u8baf | \u79d1\u6280\u7231\u597d\u8005\u5468\u520a",
-                "url": "https://github.com/ruanyf/weekly/tree/master"
-            },
-            {
-                "id": "",
-                "title": "\u79d1\u6280\u8d44\u8baf | \u5496\u5561\u5427\u5bfc\u822a",
-                "url": "https://nav.ops-coffee.cn/weekly.html"
-            }
-        ]
+        "title": "\u79d1\u6280\u8d44\u8baf | \u6e7e\u533a\u65e5\u62a5",
+        "url": "https://www.wanqu.co/"
     },
+    {
+        "id": "",
+        "title": "\u8d44\u6e90\u5206\u4eab | zsxwz",
+        "url": "https://bbs.zsxwz.com/"
+    },
+    {
+        "id": "",
+        "title": "\u77e5\u8bc6\u5206\u4eab | \u77e5\u4e4e",
+        "url": "https://www.zhihu.com/"
+    },
+    {
+        "id": "",
+        "title": "\u79d1\u6280\u8d44\u8baf | \u5c11\u6570\u6d3e",
+        "url": "https://sspai.com/"
+    },
+    {
+        "id": "",
+        "title": "\u79d1\u6280\u8bba\u575b | V2EX",
+        "url": "https://www.v2ex.com/"
+    },
+    {
+        "id": "",
+        "title": "\u826f\u5fc3\u514d\u8d39\u89c6\u9891\u7f51\u7ad9 | \u4f4e\u7aef\u5f71\u89c6",
+        "url": "https://ddys.tv/"
+    },
+    {
+        "id": "",
+        "title": "\u56fd\u5185\u89c6\u9891\u7f51\u7ad9 | bilibili",
+        "url": "https://www.bilibili.com/"
+    },
+    {
+        "id": "",
+        "title": "\u4ee3\u7801\u6258\u7ba1\u5e73\u53f0 | GitHub",
+        "url": "https://github.com/"
+    },
+    {
+        "id": "",
+        "title": "\u8c37\u6b4c\u5b66\u672f | Google Scholar",
+        "url": "https://scholar.google.com/"
+    },
+    {
+        "id": "",
+        "title": "\u5728\u7ebfLATEX | Overleaf",
+        "url": "https://www.overleaf.com/project"
+    },
+    {
+        "id": "",
+        "title": "\u5728\u7ebf\u7ffb\u8bd1 | Google \u7ffb\u8bd1",
+        "url": "https://translate.google.com.hk/?hl=zh-CN&sourceid=cnhp"
+    },
+    {
+        "id": "",
+        "title": "\u901a\u8baf\u5de5\u5177 | Telegram",
+        "url": "https://web.telegram.org/k/"
+    },
+    {
+        "id": "",
+        "title": "\u7a0d\u540e\u9605\u8bfb | Pocket",
+        "url": "https://getpocket.com/zh/saves"
+    },
+    {
+        "id": "",
+        "title": "\u6587\u732e\u9605\u8bfb\u5668 | \u5c0f\u7eff\u9cb8",
+        "url": "https://www.xljsci.com/index/index/list"
+    },
+    {
+        "id": "",
+        "title": "\u8bba\u6587\u4e0b\u8f7d | Sci-Hub",
+        "url": "https://sci-hub.se/"
+    },
+    {
+        "id": "",
+        "title": "\u6253\u5b57\u7ec3\u4e60 | EdClub",
+        "url": "https://www.typingclub.com/sportal/"
+    },
+    {
+        "id": "",
+        "title": "\u5728\u7ebf\u9605\u8bfb\u5668 | Koodo",
+        "url": "http://192.3.107.201:12345/#/manager/home"
+    },
+    {
+        "id": "",
+        "title": "\u79d1\u6280\u8d44\u8baf\u6570\u5b57\u5c3e\u5df4",
+        "url": "https://www.dgtle.com/"
+    },
+    {
+        "id": "",
+        "title": "\u79d1\u6280\u8d44\u8baf | \u79d1\u6280\u7231\u597d\u8005\u5468\u520a",
+        "url": "https://github.com/ruanyf/weekly/tree/master"
+    },
+    {
+        "id": "",
+        "title": "\u79d1\u6280\u8d44\u8baf | \u5496\u5561\u5427\u5bfc\u822a",
+        "url": "https://nav.ops-coffee.cn/weekly.html"
+    },
+
     {
         "title": "\u90ae\u7bb1",
         "id": "",
