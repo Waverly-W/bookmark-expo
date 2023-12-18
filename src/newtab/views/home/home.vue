@@ -6,38 +6,38 @@
   <el-row :gutter="20">
     <el-col :span="18" :offset="3">
       <el-row class="search-bar" justify="center">
-        <search-bar2 :bookmarks="bookmarksList"></search-bar2>
+        <!-- <search-bar2 :bookmarks="bookmarksList"></search-bar2> -->
+        <search-bar3 :bookmarks="bookmarksList"></search-bar3>
       </el-row>
-      <el-row wrap class="single-bookmark" >
+      <el-row wrap class="single-bookmark">
         <div v-for="(item, index) in bookmarksBySingle" :key="index">
           <bookmark-single :title="item.title" :url="item.url"></bookmark-single>
         </div>
       </el-row>
-      <div ref="bookmarkContainerRef" class="box-wrapper" :style="{ columnCount: layout.columnCount}">
+      <div ref="bookmarkContainerRef" class="box-wrapper" :style="{ columnCount: layout.columnCount }">
         <el-row wrap justify="space-between">
           <div v-for="(item, index) in bookmarksByFolder" :key="index" class="box-item">
-            <bookmark-component v-if="item.children"
-                :title="item.title"
-                :bookmarks-data="item.children"
-                :width="layout.cardWidth + 'px'"
-            ></bookmark-component>
+            <bookmark-component v-if="item.children" :title="item.title" :bookmarks-data="item.children"
+              :width="layout.cardWidth + 'px'"></bookmark-component>
           </div>
         </el-row>
       </div>
 
     </el-col>
   </el-row>
-
 </template>
 
 <script setup>
 /*global chrome*/
-import {ref, onMounted, reactive, onUnmounted} from 'vue';
-import {mockBookmarksData} from "@/newtab/views/home/mockBookmarksData.js";
+import { ref, onMounted, reactive, onUnmounted } from 'vue';
+import { mockBookmarksData } from "@/newtab/views/home/mockBookmarksData.js";
 import BookmarkComponent from "@/newtab/components/bookmark-component.vue";
 import BookmarkSingle from "@/newtab/components/bookmark-single.vue";
 import SearchBar from "@/newtab/components/search-bar.vue";
 import SearchBar2 from "@/newtab/components/search-bar2.vue";
+import SearchBar3 from "@/newtab/components/search-bar3.vue";
+import { createApi } from 'unsplash-js';
+
 const bookmarksAll = ref({});
 const bookmarksByFolder = ref({});
 const bookmarksBySingle = ref({});
@@ -57,7 +57,7 @@ const loadBookmarks = () => {
   }
 };
 
-const splitBookmarks = (bookmarksData) =>{
+const splitBookmarks = (bookmarksData) => {
   const folder = [];
   const single = [];
   for (let i = 0; i < bookmarksData.length; i++) {
@@ -88,18 +88,18 @@ const bookmarkContainerRef = ref(null);
 const calculateLayout = () => {
   if (bookmarkContainerRef.value) {
     const containerWidth = bookmarkContainerRef.value.offsetWidth;
-    let columnCount = Math.floor(containerWidth / (bookmarkCardMinWidth+columnGap));
+    let columnCount = Math.floor(containerWidth / (bookmarkCardMinWidth + columnGap));
     columnCount = Math.max(columnCount, 1); // 至少有一列
     let cardWidth = containerWidth / columnCount;
-    cardWidth = Math.min(cardWidth-columnGap, bookmarkCardMaxWidth);
-    cardWidth = Math.max(cardWidth-columnGap, bookmarkCardMinWidth);
+    cardWidth = Math.min(cardWidth - columnGap, bookmarkCardMaxWidth);
+    cardWidth = Math.max(cardWidth - columnGap, bookmarkCardMinWidth);
     layout.containerWidth = containerWidth;
     layout.columnCount = columnCount;
     layout.cardWidth = cardWidth;
   }
 };
 
-const bookmarksList =ref([]);
+const bookmarksList = ref([]);
 const findBookmarksWithoutChildren = (bookmarks) => {
 
   for (let i = 0; i < bookmarks.length; i++) {
@@ -123,6 +123,33 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', calculateLayout); // 组件卸载时移除监听器
 });
+
+// unsplah api
+const unsplash = createApi({
+  accessKey: '7OzRvAXarfxVVC0UuEo3wky02x8Pz084yFKEJa9K32s',
+});
+
+const controller = new AbortController();
+const signal = controller.signal;
+
+unsplash.photos.get({ photoId: '123' }, { signal }).catch(result => {
+  if (result.errors) {
+    // handle error here
+    console.log('error occurred: ', result.errors[0]);
+  } else {
+    console.log("unsplash", result);
+    const feed = result.response;
+    const total = feed.total;
+    const results = feed.results;
+
+
+    // handle success here
+    console.log(`received ${results.length} photos out of ${total}`);
+    console.log('first photo: ', results[0]);
+  }
+});
+
+controller.abort();
 
 </script>
 
@@ -157,7 +184,8 @@ onUnmounted(() => {
 .box-wrapper {
   width: 100%;
 }
-.single-bookmark{
+
+.single-bookmark {
   //box-sizing: border-box;
   //break-inside: avoid;
   padding: 5px;
@@ -169,16 +197,15 @@ onUnmounted(() => {
   padding: 5px;
 }
 
-.box-item > div {
+.box-item>div {
   height: 100%;
   background: #4286F5;
   box-sizing: border-box;
 }
 
-.search-bar{
+.search-bar {
   align-items: center;
   align-content: center;
   height: 100px;
 }
-
 </style>

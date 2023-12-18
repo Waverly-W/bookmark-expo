@@ -16,6 +16,7 @@
     "mockjs-fetch": "^2.0.0",
     "sass": "^1.69.5",
     "stylus": "^0.62.0",
+    "unsplash-js": "^7.0.19",
     "vue": "^3.3.10",
     "vue-router": "^4.2.5"
   },
