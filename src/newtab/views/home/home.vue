@@ -2,6 +2,15 @@
   <div id="building">
     <div class="filter" ref="filter"></div>
   </div>
+  <!-- <el-row justify="end">
+    <el-icon
+      @click="drawer = true"
+      style="color: white; margin-right: 20px; margin-top: 10px"
+    >
+      <Setting />
+    </el-icon>
+  </el-row> -->
+
   <el-row :gutter="20">
     <el-col :span="18" :offset="3">
       <el-row class="search-bar" justify="center">
@@ -30,6 +39,21 @@
       </div>
     </el-col>
   </el-row>
+
+  <!-- <el-drawer v-model="drawer">
+    <template #header>
+      <h4>设置</h4>
+    </template>
+    <template #default>
+      <search-img />
+    </template>
+    <template #footer>
+      <div style="flex: auto">
+        <el-button @click="cancelClick">cancel</el-button>
+        <el-button type="primary" @click="confirmClick">confirm</el-button>
+      </div>
+    </template>
+  </el-drawer> -->
 </template>
 
 <script setup>
@@ -39,7 +63,8 @@ import { mockBookmarksData } from "@/newtab/views/home/mockBookmarksData.js";
 import BookmarkComponent from "@/newtab/components/bookmark-component.vue";
 import BookmarkSingle from "@/newtab/components/bookmark-single.vue";
 import SearchBar from "@/newtab/components/search-bar.vue";
-import { createApi } from "unsplash-js";
+import SearchImg from "@/newtab/components/search-img.vue";
+import { Setting } from "@element-plus/icons-vue";
 
 const bookmarksAll = ref({});
 const bookmarksByFolder = ref({});
@@ -126,40 +151,17 @@ onUnmounted(() => {
   window.removeEventListener("resize", calculateLayout); // 组件卸载时移除监听器
 });
 
-// unsplah api
-const unsplash = createApi({
-  accessKey: "7OzRvAXarfxVVC0UuEo3wky02x8Pz084yFKEJa9K32s",
-});
-
-const controller = new AbortController();
-const signal = controller.signal;
-
-unsplash.photos.get({ photoId: "123" }, { signal }).catch((result) => {
-  if (result.errors) {
-    // handle error here
-    console.log("error occurred: ", result.errors[0]);
-  } else {
-    console.log("unsplash", result);
-    const feed = result.response;
-    const total = feed.total;
-    const results = feed.results;
-
-    // handle success here
-    console.log(`received ${results.length} photos out of ${total}`);
-    console.log("first photo: ", results[0]);
-  }
-});
-
-controller.abort();
+// const drawer = ref(false);
 </script>
 
 <style scoped lang="scss">
 #building {
-  background: url("./img.png");
-  width: 100%; //大小设置为100%
-  height: 100%; //大小设置为100%
+  background: url("https://fengzi3364.oss-cn-shanghai.aliyuncs.com/img/img.png");
+  width: 100%;
+  height: 100%;
   position: fixed;
-  background-size: 100% 100%;
+  background-size: cover; /* cover确保图片覆盖整个元素 */
+  background-position: center; /* 图片居中显示 */
   top: 0;
   left: 0;
 }
@@ -207,5 +209,15 @@ controller.abort();
   align-items: center;
   align-content: center;
   height: 100px;
+}
+
+.setting-icon {
+  margin: 20px;
+  color: white;
+}
+
+#setting-icon:hover {
+  color: #e0e0e0;
+  /* 鼠标悬停时的背景色 */
 }
 </style>
