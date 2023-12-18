@@ -1,42 +1,45 @@
 <template>
   <div id="building">
-    <div class="filter" ref="filter">
-    </div>
+    <div class="filter" ref="filter"></div>
   </div>
   <el-row :gutter="20">
     <el-col :span="18" :offset="3">
       <el-row class="search-bar" justify="center">
-        <!-- <search-bar2 :bookmarks="bookmarksList"></search-bar2> -->
-        <search-bar3 :bookmarks="bookmarksList"></search-bar3>
+        <search-bar :bookmarks="bookmarksList"></search-bar>
       </el-row>
       <el-row wrap class="single-bookmark">
         <div v-for="(item, index) in bookmarksBySingle" :key="index">
           <bookmark-single :title="item.title" :url="item.url"></bookmark-single>
         </div>
       </el-row>
-      <div ref="bookmarkContainerRef" class="box-wrapper" :style="{ columnCount: layout.columnCount }">
+      <div
+        ref="bookmarkContainerRef"
+        class="box-wrapper"
+        :style="{ columnCount: layout.columnCount }"
+      >
         <el-row wrap justify="space-between">
           <div v-for="(item, index) in bookmarksByFolder" :key="index" class="box-item">
-            <bookmark-component v-if="item.children" :title="item.title" :bookmarks-data="item.children"
-              :width="layout.cardWidth + 'px'"></bookmark-component>
+            <bookmark-component
+              v-if="item.children"
+              :title="item.title"
+              :bookmarks-data="item.children"
+              :width="layout.cardWidth + 'px'"
+            ></bookmark-component>
           </div>
         </el-row>
       </div>
-
     </el-col>
   </el-row>
 </template>
 
 <script setup>
 /*global chrome*/
-import { ref, onMounted, reactive, onUnmounted } from 'vue';
+import { ref, onMounted, reactive, onUnmounted } from "vue";
 import { mockBookmarksData } from "@/newtab/views/home/mockBookmarksData.js";
 import BookmarkComponent from "@/newtab/components/bookmark-component.vue";
 import BookmarkSingle from "@/newtab/components/bookmark-single.vue";
 import SearchBar from "@/newtab/components/search-bar.vue";
-import SearchBar2 from "@/newtab/components/search-bar2.vue";
-import SearchBar3 from "@/newtab/components/search-bar3.vue";
-import { createApi } from 'unsplash-js';
+import { createApi } from "unsplash-js";
 
 const bookmarksAll = ref({});
 const bookmarksByFolder = ref({});
@@ -52,7 +55,7 @@ const loadBookmarks = () => {
     });
   } else {
     const mockData = mockBookmarksData;
-    bookmarksAll.value = mockData  // 使用模拟数
+    bookmarksAll.value = mockData; // 使用模拟数
     splitBookmarks(mockData);
   }
 };
@@ -71,7 +74,7 @@ const splitBookmarks = (bookmarksData) => {
   }
   bookmarksByFolder.value = folder;
   bookmarksBySingle.value = single;
-}
+};
 
 const bookmarkCardMinWidth = 260;
 const bookmarkCardMaxWidth = 280;
@@ -80,7 +83,7 @@ const columnGap = 4; // 列之间的最小间隙
 const layout = reactive({
   containerWidth: 0,
   columnCount: 0,
-  cardWidth: 0
+  cardWidth: 0,
 });
 
 const bookmarkContainerRef = ref(null);
@@ -100,12 +103,11 @@ const calculateLayout = () => {
 };
 
 const bookmarksList = ref([]);
-const findBookmarksWithoutChildren = (bookmarks) => {
-
+const findBookmarks = (bookmarks) => {
   for (let i = 0; i < bookmarks.length; i++) {
-    if (bookmarks[i].children && bookmarks[i].children.length > 0) {
+    if (!bookmarks[i].url && bookmarks[i].children.length > 0) {
       // 如果书签有children字段，递归搜索其子项
-      findBookmarksWithoutChildren(bookmarks[i].children);
+      findBookmarks(bookmarks[i].children);
     } else {
       // 没有children字段，将书签添加到bookmarksList中
       bookmarksList.value.push(bookmarks[i]);
@@ -116,41 +118,39 @@ const findBookmarksWithoutChildren = (bookmarks) => {
 onMounted(() => {
   loadBookmarks();
   calculateLayout();
-  window.addEventListener('resize', calculateLayout); // 监听窗口大小变化
-  findBookmarksWithoutChildren(bookmarksAll.value)
+  window.addEventListener("resize", calculateLayout); // 监听窗口大小变化
+  findBookmarks(bookmarksAll.value);
   // localStorage.setItem("bookmarks", bookmarksAll.value)
 });
 onUnmounted(() => {
-  window.removeEventListener('resize', calculateLayout); // 组件卸载时移除监听器
+  window.removeEventListener("resize", calculateLayout); // 组件卸载时移除监听器
 });
 
 // unsplah api
 const unsplash = createApi({
-  accessKey: '7OzRvAXarfxVVC0UuEo3wky02x8Pz084yFKEJa9K32s',
+  accessKey: "7OzRvAXarfxVVC0UuEo3wky02x8Pz084yFKEJa9K32s",
 });
 
 const controller = new AbortController();
 const signal = controller.signal;
 
-unsplash.photos.get({ photoId: '123' }, { signal }).catch(result => {
+unsplash.photos.get({ photoId: "123" }, { signal }).catch((result) => {
   if (result.errors) {
     // handle error here
-    console.log('error occurred: ', result.errors[0]);
+    console.log("error occurred: ", result.errors[0]);
   } else {
     console.log("unsplash", result);
     const feed = result.response;
     const total = feed.total;
     const results = feed.results;
 
-
     // handle success here
     console.log(`received ${results.length} photos out of ${total}`);
-    console.log('first photo: ', results[0]);
+    console.log("first photo: ", results[0]);
   }
 });
 
 controller.abort();
-
 </script>
 
 <style scoped lang="scss">
@@ -197,9 +197,9 @@ controller.abort();
   padding: 5px;
 }
 
-.box-item>div {
+.box-item > div {
   height: 100%;
-  background: #4286F5;
+  background: #4286f5;
   box-sizing: border-box;
 }
 

@@ -1,118 +1,284 @@
 <template>
-  <div class="search-container">
-    <el-autocomplete
-        v-model="searchQuery"
-        placeholder="搜索书签或网络..."
-
-        @keyup.enter="performSearch"
-        :trigger-on-focus="false"
-        clearable
-        @clear="clearSearch"
-        :fetch-suggestions="querySearch"
-        @select="jumpToSelected"
-        :style="{ width: '100%' }"
-        :popper-append-to-body="false"
-    >
-      <template #prepend>
-        <div class="search-select">
-          <el-select v-model="selectedEngine" placeholder="选择搜索引擎">
-            <el-option
-                v-for="(url, name) in searchEngines"
-                :key="name"
-                :label="name"
-                :value="url"
-            ></el-option>
-          </el-select>
+  <div id="searchbar" ref="searchbarRef">
+    <div class="custom-select" @click="toggleDropdown">
+      <div class="select-selected">
+        {{ selectedEngine }}
+        <el-icon sizestyle="right: 20px; top: 4px">
+          <ArrowDownBold />
+        </el-icon>
+      </div>
+      <div class="select-items" v-show="dropdownOpen">
+        <div
+          v-for="(url, engine) in searchEngines"
+          :key="engine"
+          @click="(event) => selectEngine(event, engine)"
+        >
+          {{ engine }}
         </div>
-      </template>
+      </div>
+    </div>
 
+    <input
+      type="text"
+      placeholder="Search"
+      @focus="dropdownOpen = false"
+      @input="searchAction($event)"
+      @keyup.down="navigate(1)"
+      @keyup.up="navigate(-1)"
+      @keyup.enter="confirmSelection"
+      ref="searchInputRef"
+    />
 
-      <template #append>
-        <el-button :icon="Search" @click="performSearch"/>
-      </template>
-    </el-autocomplete>
+    <button @click="searchInEngine">
+      <el-icon>
+        <Search />
+      </el-icon>
+    </button>
 
-
-
+    <teleport to="body">
+      <div v-if="searchQuery" class="popup" :style="{ top: popupTop, left: popupLeft }">
+        <div
+          v-for="(item, index) in searchResult"
+          :key="index"
+          :href="item.url"
+          :class="{ selected: index === selectedIndex }"
+          @click="goToBookmark(item.url)"
+        >
+          {{ item.title }}
+        </div>
+      </div>
+    </teleport>
   </div>
 </template>
 
-<script setup lang="js">
-import {ref} from 'vue';
-import {ElSelect, ElOption, ElButton} from 'element-plus';
-import {Search} from "@element-plus/icons-vue";
+<script setup lang="ts">
+import { Search, ArrowDownBold } from "@element-plus/icons-vue";
+import { ref, reactive, onMounted, onUnmounted, watch } from "vue";
 
-const props = defineProps({
-  bookmarks: ''
+const searchResult = ref([]);
+const searchQuery = ref("");
+const selectedEngine = ref("Google");
+const dropdownOpen = ref(false);
+const selectedIndex = ref(-1); // 新增：跟踪选中的条目索引
+const searchEngines = reactive({
+  Google: "https://www.google.com/search?q=",
+  Bing: "https://www.bing.com/search?q=",
+  DuckDuckGo: "https://duckduckgo.com/?q=",
 });
-const createFilter = (queryString) => {
-  return (bookmarks) => {
-    return bookmarks.value.toLowerCase().includes(queryString.toLowerCase());
-  };
-};
-const querySearch = (queryString, callback) => {
-  const bookmarks = props.bookmarks.map(item => {
-    item.value = item.title;
-    return item
-  })
-  console.info(bookmarks);
-  const results = queryString
-      ? bookmarks.filter(createFilter(queryString))
-      : bookmarks;
+const searchbarRef = ref(null);
+const searchInputRef = ref(null);
+const popupTop = ref("0px");
+const popupLeft = ref("0px");
+const popupWidth = ref("0px");
+const props = defineProps({
+  bookmarks: [],
+});
 
-  console.info(results);
-  // 调用回调函数返回建议
-  callback(results);
-};
-const jumpToSelected = (item) => {
-  window.open(item.url);
-}
-const selectedEngine = ref('https://www.google.com/search?q=');
-
-
-const searchEngines = {
-  'Google': 'https://www.google.com/search?q=',
-  'Bing': 'https://www.bing.com/search?q=',
-  // ...其他搜索引擎
-};
-
-const searchQuery = ref('');
-const performSearch = () => {
-  const query = searchQuery.value;
-  const engineURL = selectedEngine.value;
-  const searchURL = engineURL + encodeURIComponent(query);
-
-  window.open(searchURL, '_blank');
-};
-const clearSearch = () => {
-  searchQuery.value = '';
+function toggleDropdown() {
+  dropdownOpen.value = !dropdownOpen.value;
 }
 
+function selectEngine(event, engine) {
+  event.stopPropagation();
+  selectedEngine.value = engine;
+  dropdownOpen.value = false;
+}
+
+const onClickOutside = (event) => {
+  if (!searchbarRef.value.contains(event.target)) {
+    dropdownOpen.value = false;
+  }
+};
+
+function searchAction(event: any) {
+  searchQuery.value = event.target.value.toLowerCase();
+  searchResult.value = props.bookmarks.filter((item: any) =>
+    item.title.toLowerCase().includes(searchQuery.value)
+  );
+}
+
+function navigate(step: number) {
+  const resultCount = searchResult.value.length;
+  if (resultCount > 0) {
+    selectedIndex.value = (selectedIndex.value + step + resultCount) % resultCount;
+  }
+}
+
+function goToBookmark(url: string) {
+  window.open(url, "_blank");
+}
+
+function confirmSelection() {
+  if (selectedIndex.value >= 0 && searchResult.value[selectedIndex.value]) {
+    window.open(searchResult.value[selectedIndex.value].url, "_blank");
+  } else if (searchQuery.value) {
+    const engineUrl = searchEngines[selectedEngine.value];
+    window.open(`${engineUrl}${encodeURIComponent(searchQuery.value)}`, "_blank");
+  }
+}
+
+onMounted(() => {
+  const rect = searchbarRef.value.getBoundingClientRect();
+  popupTop.value = `${rect.bottom + window.scrollY}px`;
+  popupLeft.value = `${rect.left + window.scrollX}px`;
+  updatePopupPosition();
+  document.addEventListener("click", onClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener("click", onClickOutside);
+});
+
+function searchInEngine() {
+  const engineUrl = searchEngines[selectedEngine.value];
+  window.open(`${engineUrl}${encodeURIComponent(searchQuery.value)}`, "_blank");
+}
+
+function updatePopupPosition() {
+  if (searchbarRef.value) {
+    const rect = searchbarRef.value.getBoundingClientRect();
+    const rectInput = searchInputRef.value.getBoundingClientRect();
+    popupTop.value = `${rect.bottom + window.scrollY}px`;
+    popupLeft.value = `${rect.left + window.scrollX + 140}px`;
+    popupWidth.value = `${rectInput.width}px`; // 新增：设置弹出框宽度
+  }
+}
+
+watch(searchQuery, () => {
+  if (!searchQuery.value) {
+    searchResult.value = [];
+    selectedIndex.value = -1; // 清空选中状态
+  }
+  updatePopupPosition();
+});
 </script>
 
-<style scoped>
-.search-container {
-  display: flex; /* 使用Flexbox */
-  justify-content: center; /* 水平居中 */
-  align-items: center; /* 垂直居中 */
-  margin: 20px 0; /* 提供上下间距 */
-  width: 100%;
-
-  .search-select {
-    width: 100px;
-
-    :deep(.el-input__wrapper) {
-      border-radius: 5px 0 0 5px;
-      box-shadow: 0 0 0 0;
-      padding: 4px;
-    }
-  }
-
-
-  .search-input {
-    width: 60%;
-  }
+<style>
+#searchbar {
+  position: relative;
+  width: 40%;
+  min-width: 500px;
+  display: flex;
+  align-items: center;
+  background-color: white;
+  /* 搜索框背景色 */
+  border-radius: 22px;
+  /* 圆角值根据实际效果调整 */
+  padding: 5px;
 }
 
+.custom-select {
+  margin: 5px;
+  position: relative;
+  width: 140px;
+  cursor: pointer;
+}
 
+.select-selected {
+  display: flex;
+  justify-content: space-between;
+  padding-left: 20px;
+  background-color: transparent;
+  color: black;
+  border-radius: 10px;
+  margin: 0 auto;
+}
+
+.select-items {
+  position: absolute;
+  background-color: white;
+  padding: 10px;
+  top: 36px;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.select-items div {
+  padding: 10px;
+  color: black;
+}
+
+.select-items div:last-child {
+  border-bottom: none;
+}
+
+.select-items div:hover {
+  border-radius: 10px;
+  background-color: #e0e0e0;
+}
+
+#searchbar input {
+  border: none;
+  background-color: transparent;
+  color: black;
+  margin-right: 8px;
+  /* 保持一定间距 */
+}
+
+#searchbar input {
+  height: 30px;
+  flex-grow: 1;
+  outline: none;
+  /* 去除获焦时的边框 */
+}
+
+#searchbar button {
+  margin-right: 20px;
+  border: none;
+  background-color: transparent;
+  /* 圆形按钮 */
+  padding: 10px;
+  /* 按钮大小 */
+  cursor: pointer;
+  /* 鼠标悬停时的指针样式 */
+  outline: none;
+  /* 去除获焦时的边框 */
+}
+
+#searchbar button:hover {
+  color: #e0e0e0;
+  /* 鼠标悬停时的背景色 */
+}
+
+.popup {
+  position: absolute;
+  width: var(--popup-width);
+  /* 使用 CSS 变量设置宽度 */
+  top: 100%;
+  /* 使弹出框位于 searchbar 的底部 */
+  left: 140px;
+  /* 与 searchbar 的左边对齐 */
+  margin-top: 5px;
+  /* 与 searchbar 有一定间距 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  background-color: #ffffff;
+  /* 与 searchbar 背景色一致 */
+  overflow: hidden;
+  /* 隐藏超出弹出框的部分 */
+}
+
+.popup div {
+  display: flex;
+  margin: 10px;
+  padding: 6px;
+  color: black;
+  /* 链接文本颜色 */
+  text-decoration: none;
+  /* 去除下划线 */
+  background-color: #ffffff;
+  /* 链接背景色 */
+}
+
+.popup div.selected,
+.popup div:hover {
+  cursor: pointer;
+  border-radius: 10px;
+  margin: 10px;
+  background-color: #e0e0e0;
+  /* 选中或悬停的背景色 */
+}
 </style>
