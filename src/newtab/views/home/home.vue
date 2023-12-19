@@ -33,6 +33,7 @@
               :title="item.title"
               :bookmarks-data="item.children"
               :width="layout.cardWidth + 'px'"
+              :maxHeight="500 + 'px'"
             ></bookmark-component>
           </div>
         </el-row>
@@ -77,11 +78,13 @@ const loadBookmarks = () => {
     chrome.bookmarks.getTree((bookmarkTreeNodes) => {
       bookmarksAll.value = bookmarkTreeNodes[0].children[0].children;
       splitBookmarks(bookmarkTreeNodes[0].children[0].children);
+      findBookmarks(bookmarkTreeNodes[0].children[0].children);
     });
   } else {
     const mockData = mockBookmarksData;
     bookmarksAll.value = mockData; // 使用模拟数
     splitBookmarks(mockData);
+    findBookmarks(mockData);
   }
 };
 
@@ -101,8 +104,8 @@ const splitBookmarks = (bookmarksData) => {
   bookmarksBySingle.value = single;
 };
 
-const bookmarkCardMinWidth = 260;
-const bookmarkCardMaxWidth = 280;
+const bookmarkCardMinWidth = 240;
+const bookmarkCardMaxWidth = 260;
 const columnGap = 4; // 列之间的最小间隙
 // 定义一个响应式对象来存储布局信息
 const layout = reactive({
@@ -144,8 +147,6 @@ onMounted(() => {
   loadBookmarks();
   calculateLayout();
   window.addEventListener("resize", calculateLayout); // 监听窗口大小变化
-  findBookmarks(bookmarksAll.value);
-  // localStorage.setItem("bookmarks", bookmarksAll.value)
 });
 onUnmounted(() => {
   window.removeEventListener("resize", calculateLayout); // 组件卸载时移除监听器
