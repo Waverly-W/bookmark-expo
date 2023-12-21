@@ -2,14 +2,17 @@
   <div id="searchbar" ref="searchbarRef">
     <div class="custom-select" @click="toggleDropdown">
       <div class="select-selected">
-        {{ selectedEngine }}
-        <el-icon sizestyle="right: 20px; top: 4px">
+        <i
+          :class="['icon', 'iconfont', `icon-${searchEngines[selectedEngine].icon}`]"
+          style="font-size: 22px; margin-right: 10px"
+        />
+        <el-icon sizestyle="right: 20px;">
           <ArrowDownBold />
         </el-icon>
       </div>
       <div class="select-items" v-show="dropdownOpen">
         <div
-          v-for="(url, engine) in searchEngines"
+          v-for="(_, engine) in searchEngines"
           :key="engine"
           @click="(event) => selectEngine(event, engine)"
         >
@@ -52,18 +55,18 @@
 </template>
 
 <script setup lang="ts">
-import { Search, ArrowDownBold } from "@element-plus/icons-vue";
+import { Search, ArrowDownBold, ChromeFilled } from "@element-plus/icons-vue";
 import { ref, reactive, onMounted, onUnmounted, watch } from "vue";
 
 const searchResult = ref([]);
 const searchQuery = ref("");
-const selectedEngine = ref("Google");
+const selectedEngine = ref("Bing");
 const dropdownOpen = ref(false);
 const selectedIndex = ref(-1); // 新增：跟踪选中的条目索引
 const searchEngines = reactive({
-  Google: "https://www.google.com/search?q=",
-  Bing: "https://www.bing.com/search?q=",
-  DuckDuckGo: "https://duckduckgo.com/?q=",
+  Google: { url: "https://www.google.com/search?q=", icon: "google" },
+  Bing: { url: "https://www.bing.com/search?q=", icon: "bing" },
+  DuckDuckGo: { url: "https://duckduckgo.com/?q=", icon: "duckduckgo" },
 });
 const searchbarRef = ref(null);
 const searchInputRef = ref(null);
@@ -112,7 +115,7 @@ function confirmSelection() {
   if (selectedIndex.value >= 0 && searchResult.value[selectedIndex.value]) {
     window.open(searchResult.value[selectedIndex.value].url, "_blank");
   } else if (searchQuery.value) {
-    const engineUrl = searchEngines[selectedEngine.value];
+    const engineUrl = searchEngines[selectedEngine.value].url;
     window.open(`${engineUrl}${encodeURIComponent(searchQuery.value)}`, "_blank");
   }
 }
@@ -130,7 +133,7 @@ onUnmounted(() => {
 });
 
 function searchInEngine() {
-  const engineUrl = searchEngines[selectedEngine.value];
+  const engineUrl = searchEngines[selectedEngine.value].url;
   window.open(`${engineUrl}${encodeURIComponent(searchQuery.value)}`, "_blank");
 }
 
@@ -168,32 +171,34 @@ watch(searchQuery, () => {
 }
 
 .custom-select {
+  font-size: 0.8em;
   margin: 5px;
   position: relative;
-  width: 140px;
+  width: 8px0px;
   cursor: pointer;
-}
 
-.select-selected {
-  display: flex;
-  justify-content: space-between;
-  padding-left: 20px;
-  background-color: transparent;
-  color: black;
-  border-radius: 10px;
-  margin: 0 auto;
-}
+  .select-selected {
+    display: block;
+    justify-content: space-between;
+    padding-left: 20px;
+    background-color: transparent;
+    color: black;
+    border-radius: 10px;
+    margin: 0 auto;
+  }
 
-.select-items {
-  position: absolute;
-  background-color: white;
-  padding: 10px;
-  top: 36px;
-  left: 0;
-  right: 0;
-  z-index: 99;
-  border-radius: 10px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  .select-items {
+    position: absolute;
+    background-color: white;
+    padding: 10px;
+    top: 36px;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    width: 150%;
+  }
 }
 
 .select-items div {
