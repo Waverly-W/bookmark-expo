@@ -7,6 +7,12 @@
     >
       <Setting />
     </el-icon>
+    <el-icon
+      @click="refreshBookmarks"
+      style="color: white; margin-right: 20px; margin-top: 10px"
+    >
+      <Refresh />
+    </el-icon>
   </el-row>
 
   <el-row :gutter="20">
@@ -54,7 +60,7 @@ import BookmarkComponent from "@/newtab/components/bookmark-component.vue";
 import BookmarkSingle from "@/newtab/components/bookmark-single.vue";
 import SearchBar from "@/newtab/components/search-bar.vue";
 import SettingPanel from "@/newtab/components/setting-panel.vue";
-import { Setting } from "@element-plus/icons-vue";
+import { Setting, Refresh } from "@element-plus/icons-vue";
 import backgroundImage from "@/newtab/components/background-image.vue";
 
 const bookmarksAll = ref({});
@@ -156,22 +162,34 @@ const loadBookmarksFromStorage = () => {
   });
 };
 
+const refreshBookmarks = async () => {
+  isChromeExtension ? loadBookmarksFromChrome() : loadBookmarksFromJSON();
+};
+
+const loadBookmarksFromChrome = () => {
+  chrome.bookmarks.getTree((bookmarkTreeNodes) => {
+    bookmarksAll.value = bookmarkTreeNodes[0].children[0].children;
+    splitBookmarks(bookmarksAll.value);
+    findBookmarks(bookmarksAll.value);
+    saveBookmarksToStorage();
+  });
+};
+
+const loadBookmarksFromJSON = () => {
+  bookmarksAll.value = mockBookmarksData;
+  splitBookmarks(bookmarksAll.value);
+  findBookmarks(bookmarksAll.value);
+};
+
 onMounted(() => {
   if (isChromeExtension) {
     loadBookmarksFromStorage().then((isLoadedFromStorage) => {
       if (!isLoadedFromStorage) {
-        chrome.bookmarks.getTree((bookmarkTreeNodes) => {
-          bookmarksAll.value = bookmarkTreeNodes[0].children[0].children;
-          splitBookmarks(bookmarksAll.value);
-          findBookmarks(bookmarksAll.value);
-          saveBookmarksToStorage();
-        });
+        loadBookmarksFromChrome();
       }
     });
   } else {
-    bookmarksAll.value = mockBookmarksData;
-    splitBookmarks(bookmarksAll.value);
-    findBookmarks(bookmarksAll.value);
+    loadBookmarksFromJSON();
   }
   calculateLayout();
   window.addEventListener("resize", calculateLayout);
