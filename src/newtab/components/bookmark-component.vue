@@ -4,7 +4,6 @@
     :style="{
       backgroundColor: randomBackgroundColor,
       width: width,
-      maxHeight: isExpanded ? 'none' : maxHeight,
     }"
     ref="bookmarkListRef"
   >
@@ -65,7 +64,6 @@ const props = defineProps({
 });
 
 const isExpanded = ref(false);
-const maxHeight = ref(props.maxHeight);
 
 const colorArray = ["#414b4b", "#383c51", "#3f534b", "#505e60", "#3a3a3a", "#443a3a"];
 // Function to get a random color from the array
@@ -106,10 +104,7 @@ const isContentOverflowing = computed(() => {
 // 根据是否折叠和内容是否超过maxHeight来动态设置样式
 const bookmarkListStyle = computed(() => {
   return {
-    maxHeight:
-      isExpanded.value || !isContentOverflowing.value
-        ? "none"
-        : parseInt(props.maxHeight) - 45 + "px",
+    maxHeight: isExpanded.value || !isContentOverflowing.value ? "none" : props.maxHeight, // 直接使用props.maxHeight，它已经包含单位
     overflowY: "auto",
   };
 });
@@ -120,13 +115,13 @@ const toggleExpand = () => {
 };
 
 watch(
-  () => props.maxHeight,
-  () => {
-    if (bookmarkListRef.value) {
-      isContentOverflowing.value =
-        bookmarkListRef.value.scrollHeight > parseInt(props.maxHeight);
-    }
-  }
+  () => props.maxHeight
+  // () => {
+  //   if (bookmarkListRef.value) {
+  //     isContentOverflowing.value =
+  //       bookmarkListRef.value.scrollHeight > parseInt(props.maxHeight);
+  //   }
+  // }
 );
 
 onMounted(async () => {
@@ -142,11 +137,12 @@ onMounted(async () => {
   margin: 10px;
 
   .card-header {
-    font-size: 1em;
+    font-size: 1.2em;
     font-weight: bold;
     margin: 5px;
   }
   .card-header button {
+    font-size: 10px;
     background: transparent;
     color: white;
     border: none;

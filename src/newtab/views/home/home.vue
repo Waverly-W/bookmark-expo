@@ -2,17 +2,17 @@
   <div id="building">
     <div class="filter" ref="filter"></div>
   </div>
-  <!-- <el-row justify="end">
+  <el-row justify="end">
     <el-icon
-      @click="drawer = true"
+      @click="openSettingPanel"
       style="color: white; margin-right: 20px; margin-top: 10px"
     >
       <Setting />
     </el-icon>
-  </el-row> -->
+  </el-row>
 
   <el-row :gutter="20">
-    <el-col :span="18" :offset="3">
+    <el-col :span="20" :offset="2">
       <el-row class="search-bar" justify="center">
         <search-bar :bookmarks="bookmarksList"></search-bar>
       </el-row>
@@ -33,7 +33,7 @@
               :title="item.title"
               :bookmarks-data="item.children"
               :width="layout.cardWidth + 'px'"
-              :maxHeight="500 + 'px'"
+              :maxHeight="maxHeight + 'px'"
             ></bookmark-component>
           </div>
         </el-row>
@@ -41,20 +41,12 @@
     </el-col>
   </el-row>
 
-  <!-- <el-drawer v-model="drawer">
-    <template #header>
-      <h4>设置</h4>
-    </template>
-    <template #default>
-      <search-img />
-    </template>
-    <template #footer>
-      <div style="flex: auto">
-        <el-button @click="cancelClick">cancel</el-button>
-        <el-button type="primary" @click="confirmClick">confirm</el-button>
-      </div>
-    </template>
-  </el-drawer> -->
+  <SettingPanel
+    :modelValue="drawer"
+    @update:modelValue="drawer = $event"
+    :maxHeight="maxHeight"
+    @update:maxHeight="handleMaxHeightUpdate"
+  />
 </template>
 
 <script setup>
@@ -64,6 +56,7 @@ import { mockBookmarksData } from "@/newtab/views/home/mockBookmarksData.js";
 import BookmarkComponent from "@/newtab/components/bookmark-component.vue";
 import BookmarkSingle from "@/newtab/components/bookmark-single.vue";
 import SearchBar from "@/newtab/components/search-bar.vue";
+import SettingPanel from "@/newtab/components/setting-panel.vue";
 import SearchImg from "@/newtab/components/search-img.vue";
 import { Setting } from "@element-plus/icons-vue";
 
@@ -130,6 +123,11 @@ const calculateLayout = () => {
   }
 };
 
+const openSettingPanel = () => {
+  // 打开设置面板的逻辑
+  drawer.value = true;
+};
+
 const bookmarksList = ref([]);
 const findBookmarks = (bookmarks) => {
   for (let i = 0; i < bookmarks.length; i++) {
@@ -151,8 +149,12 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener("resize", calculateLayout); // 组件卸载时移除监听器
 });
+const drawer = ref(false);
+const maxHeight = ref(300);
 
-// const drawer = ref(false);
+const handleMaxHeightUpdate = (newMaxHeight) => {
+  maxHeight.value = newMaxHeight;
+};
 </script>
 
 <style scoped lang="scss">
@@ -215,10 +217,10 @@ onUnmounted(() => {
 .setting-icon {
   margin: 20px;
   color: white;
-}
-
-#setting-icon:hover {
-  color: #e0e0e0;
-  /* 鼠标悬停时的背景色 */
+  &:hover {
+    color: #000000;
+    /* 鼠标悬停时的背景色 */
+    background-color: #f1f1f1;
+  }
 }
 </style>
