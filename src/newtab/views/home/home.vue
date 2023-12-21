@@ -1,7 +1,5 @@
 <template>
-  <div id="building">
-    <div class="filter" ref="filter"></div>
-  </div>
+  <backgroundImage />
   <el-row justify="end">
     <el-icon
       @click="openSettingPanel"
@@ -50,57 +48,69 @@
 </template>
 
 <script setup>
-/*global chrome*/
 import { ref, onMounted, reactive, onUnmounted } from "vue";
 import { mockBookmarksData } from "@/newtab/views/home/mockBookmarksData.js";
 import BookmarkComponent from "@/newtab/components/bookmark-component.vue";
 import BookmarkSingle from "@/newtab/components/bookmark-single.vue";
 import SearchBar from "@/newtab/components/search-bar.vue";
 import SettingPanel from "@/newtab/components/setting-panel.vue";
-import SearchImg from "@/newtab/components/search-img.vue";
 import { Setting } from "@element-plus/icons-vue";
+import backgroundImage from "@/newtab/components/background-image.vue";
 
 const bookmarksAll = ref({});
 const bookmarksByFolder = ref({});
 const bookmarksBySingle = ref({});
-// 加载书签的函数
 const isChromeExtension = typeof chrome !== "undefined" && chrome.bookmarks;
-const loadBookmarks = () => {
-  if (isChromeExtension) {
-    // 使用真实的 Chrome API
-    chrome.bookmarks.getTree((bookmarkTreeNodes) => {
-      bookmarksAll.value = bookmarkTreeNodes[0].children[0].children;
-      splitBookmarks(bookmarkTreeNodes[0].children[0].children);
-      findBookmarks(bookmarkTreeNodes[0].children[0].children);
-    });
-  } else {
-    const mockData = mockBookmarksData;
-    bookmarksAll.value = mockData; // 使用模拟数
-    splitBookmarks(mockData);
-    findBookmarks(mockData);
-  }
-};
+const bookmarksList = ref([]);
+const drawer = ref(false);
+const maxHeight = ref(300);
 
+//分割书签数据
 const splitBookmarks = (bookmarksData) => {
   const folder = [];
   const single = [];
-  for (let i = 0; i < bookmarksData.length; i++) {
-    if (bookmarksData[i].children && bookmarksData[i].children.length > 0) {
-      // 如果元素有children字段，则添加到withChildren中
-      folder.push(bookmarksData[i]);
+  bookmarksData.forEach((bookmark) => {
+    if (bookmark.children && bookmark.children.length > 0) {
+      folder.push(bookmark);
     } else {
-      // 如果元素没有children字段，则添加到withoutChildren中
-      single.push(bookmarksData[i]);
+      single.push(bookmark);
     }
-  }
+  });
   bookmarksByFolder.value = folder;
   bookmarksBySingle.value = single;
 };
 
+// 查找所有书签
+const findBookmarks = (bookmarks) => {
+  const bookmarksListLocal = localStorage.getItem("bookmarksList");
+  if (bookmarksListLocal) {
+    bookmarksList.value = JSON.parse(bookmarksListLocal);
+  } else {
+    bookmarks.forEach((bookmark) => {
+      if (!bookmark.url && bookmark.children.length > 0) {
+        findBookmarks(bookmark.children);
+      } else {
+        bookmarksList.value.push(bookmark);
+      }
+    });
+    localStorage.setItem("bookmarksList", JSON.stringify(bookmarksList.value));
+  }
+};
+
+// 打开设置面板
+const openSettingPanel = () => {
+  drawer.value = true;
+};
+
+// 更新最大高度
+const handleMaxHeightUpdate = (newMaxHeight) => {
+  maxHeight.value = newMaxHeight;
+};
+
+// 布局计算
 const bookmarkCardMinWidth = 240;
 const bookmarkCardMaxWidth = 260;
-const columnGap = 4; // 列之间的最小间隙
-// 定义一个响应式对象来存储布局信息
+const columnGap = 4;
 const layout = reactive({
   containerWidth: 0,
   columnCount: 0,
@@ -113,86 +123,71 @@ const calculateLayout = () => {
   if (bookmarkContainerRef.value) {
     const containerWidth = bookmarkContainerRef.value.offsetWidth;
     let columnCount = Math.floor(containerWidth / (bookmarkCardMinWidth + columnGap));
-    columnCount = Math.max(columnCount, 1); // 至少有一列
-    let cardWidth = containerWidth / columnCount;
-    cardWidth = Math.min(cardWidth - columnGap, bookmarkCardMaxWidth);
-    cardWidth = Math.max(cardWidth - columnGap, bookmarkCardMinWidth);
+    columnCount = Math.max(columnCount, 1);
+    let cardWidth = containerWidth / columnCount - columnGap;
+    cardWidth = Math.min(cardWidth, bookmarkCardMaxWidth);
     layout.containerWidth = containerWidth;
     layout.columnCount = columnCount;
     layout.cardWidth = cardWidth;
   }
 };
 
-const openSettingPanel = () => {
-  // 打开设置面板的逻辑
-  drawer.value = true;
+const saveBookmarksToStorage = () => {
+  const bookmarksData = {
+    bookmarksByFolder: bookmarksByFolder.value,
+    bookmarksBySingle: bookmarksBySingle.value,
+    bookmarksList: bookmarksList.value,
+  };
+  chrome.storage.local.set({ bookmarksData });
 };
 
-const bookmarksList = ref([]);
-const findBookmarks = (bookmarks) => {
-  for (let i = 0; i < bookmarks.length; i++) {
-    if (!bookmarks[i].url && bookmarks[i].children.length > 0) {
-      // 如果书签有children字段，递归搜索其子项
-      findBookmarks(bookmarks[i].children);
-    } else {
-      // 没有children字段，将书签添加到bookmarksList中
-      bookmarksList.value.push(bookmarks[i]);
-    }
-  }
+const loadBookmarksFromStorage = () => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get(["bookmarksData"], (result) => {
+      if (result.bookmarksData) {
+        bookmarksByFolder.value = result.bookmarksData.bookmarksByFolder;
+        bookmarksBySingle.value = result.bookmarksData.bookmarksBySingle;
+        bookmarksList.value = result.bookmarksData.bookmarksList;
+        resolve(true); // 数据从缓存加载
+      } else {
+        resolve(false); // 无缓存数据
+      }
+    });
+  });
 };
 
 onMounted(() => {
-  loadBookmarks();
+  if (isChromeExtension) {
+    loadBookmarksFromStorage().then((isLoadedFromStorage) => {
+      if (!isLoadedFromStorage) {
+        chrome.bookmarks.getTree((bookmarkTreeNodes) => {
+          bookmarksAll.value = bookmarkTreeNodes[0].children[0].children;
+          splitBookmarks(bookmarksAll.value);
+          findBookmarks(bookmarksAll.value);
+          saveBookmarksToStorage();
+        });
+      }
+    });
+  } else {
+    bookmarksAll.value = mockBookmarksData;
+    splitBookmarks(bookmarksAll.value);
+    findBookmarks(bookmarksAll.value);
+  }
   calculateLayout();
-  window.addEventListener("resize", calculateLayout); // 监听窗口大小变化
+  window.addEventListener("resize", calculateLayout);
 });
-onUnmounted(() => {
-  window.removeEventListener("resize", calculateLayout); // 组件卸载时移除监听器
-});
-const drawer = ref(false);
-const maxHeight = ref(300);
 
-const handleMaxHeightUpdate = (newMaxHeight) => {
-  maxHeight.value = newMaxHeight;
-};
+onUnmounted(() => {
+  window.removeEventListener("resize", calculateLayout);
+});
 </script>
 
 <style scoped lang="scss">
-#building {
-  background: url("https://fengzi3364.oss-cn-shanghai.aliyuncs.com/img/img.png");
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  background-size: cover; /* cover确保图片覆盖整个元素 */
-  background-position: center; /* 图片居中显示 */
-  top: 0;
-  left: 0;
-}
-
-.filter {
-  width: 100%; //大小设置为100%
-  height: 100%; //大小设置为100%
-  backdrop-filter: blur(5px);
-}
-
-.full_page {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  min-height: 100vh;
-  overflow: auto;
-  color: white;
-}
-
 .box-wrapper {
   width: 100%;
 }
 
 .single-bookmark {
-  //box-sizing: border-box;
-  //break-inside: avoid;
   padding: 5px;
 }
 
@@ -219,7 +214,6 @@ const handleMaxHeightUpdate = (newMaxHeight) => {
   color: white;
   &:hover {
     color: #000000;
-    /* 鼠标悬停时的背景色 */
     background-color: #f1f1f1;
   }
 }

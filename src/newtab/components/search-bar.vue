@@ -74,7 +74,7 @@ const popupTop = ref("0px");
 const popupLeft = ref("0px");
 const popupWidth = ref("0px");
 const props = defineProps({
-  bookmarks: [],
+  bookmarks: Array,
 });
 
 function toggleDropdown() {
@@ -85,6 +85,7 @@ function selectEngine(event, engine) {
   event.stopPropagation();
   selectedEngine.value = engine;
   dropdownOpen.value = false;
+  localStorage.setItem("defaultSearchEngine", engine);
 }
 
 const onClickOutside = (event) => {
@@ -119,6 +120,13 @@ function confirmSelection() {
     window.open(`${engineUrl}${encodeURIComponent(searchQuery.value)}`, "_blank");
   }
 }
+const loadSettings = () => {
+  // 加载默认搜索引擎
+  const savedEngine = localStorage.getItem("defaultSearchEngine");
+  if (savedEngine) {
+    selectedEngine.value = savedEngine;
+  }
+};
 
 onMounted(() => {
   const rect = searchbarRef.value.getBoundingClientRect();
@@ -126,6 +134,7 @@ onMounted(() => {
   popupLeft.value = `${rect.left + window.scrollX}px`;
   updatePopupPosition();
   document.addEventListener("click", onClickOutside);
+  loadSettings();
 });
 
 onUnmounted(() => {

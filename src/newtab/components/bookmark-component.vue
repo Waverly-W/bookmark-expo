@@ -88,13 +88,6 @@ function locationToUrl(url) {
 }
 
 const bookmarkListRef = ref(null);
-const showExpandButton = computed(() => {
-  if (!bookmarkListRef.value) return false;
-  const actualHeight = bookmarkListRef.value.scrollHeight;
-  const maxHeightInPixels = parseInt(props.maxHeight);
-  console.info(actualHeight, maxHeightInPixels);
-  return actualHeight > maxHeightInPixels;
-});
 
 const isContentOverflowing = computed(() => {
   if (!bookmarkListRef.value) return false;
@@ -114,15 +107,7 @@ const toggleExpand = () => {
   isExpanded.value = !isExpanded.value;
 };
 
-watch(
-  () => props.maxHeight
-  // () => {
-  //   if (bookmarkListRef.value) {
-  //     isContentOverflowing.value =
-  //       bookmarkListRef.value.scrollHeight > parseInt(props.maxHeight);
-  //   }
-  // }
-);
+// watch(() => props.maxHeight);
 
 onMounted(async () => {
   await nextTick();

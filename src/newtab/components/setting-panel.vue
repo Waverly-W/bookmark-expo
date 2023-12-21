@@ -48,17 +48,10 @@ watch(
   }
 );
 
-// 监听外部传入的最大高度变化
-watch(
-  () => props.maxHeight,
-  (newVal) => {
-    localMaxHeight.value = newVal;
-  }
-);
-
 // 点击确认按钮时更新maxHeight
 const confirmSettings = () => {
-  emit("update:maxHeight", localMaxHeight.value);
+    emit("update:maxHeight", localMaxHeight.value);
+  localStorage.setItem('folderMaxHeight', localMaxHeight.value);
   drawer.value = false; // 关闭抽屉
 };
 
