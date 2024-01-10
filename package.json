@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite -c vite.popup.config.js",
-    "build": "vite build -c vite.popup.config.js && vite build -c vite.content.config.js && vite build -c vite.background.config.js && vite build -c vite.newtab.config.js && node build.js",
+    "build": "vite build -c vite.popup.config.js && vite build -c vite.background.config.js && vite build -c vite.newtab.config.js && node build.js",
     "preview": "vite preview -c vite.popup.config.js"
   },
   "dependencies": {

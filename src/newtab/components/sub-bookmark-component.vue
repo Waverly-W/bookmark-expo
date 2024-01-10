@@ -55,9 +55,7 @@ const props = defineProps({
   width: "220px",
 });
 const isFold = ref(true);
-const hasChildren = (item) => {
-  return item.children && item.children.length > 0;
-};
+
 function changeFold() {
   console.info(isFold.value);
   isFold.value = !isFold.value;
@@ -92,5 +90,4 @@ function locationToUrl(url) {
   text-decoration: underline; /* 鼠标悬停时添加下划线 */
 }
 
-/* Add additional styling as needed */
 </style>

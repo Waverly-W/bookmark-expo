@@ -1,16 +1,10 @@
 <template>
   <backgroundImage />
-  <el-row justify="end">
-    <el-icon
-      @click="openSettingPanel"
-      style="color: white; margin-right: 20px; margin-top: 10px"
-    >
+  <el-row justify="end" class="icon-row">
+    <el-icon @click="openSettingPanel" class="icon-style">
       <Setting />
     </el-icon>
-    <el-icon
-      @click="refreshBookmarks"
-      style="color: white; margin-right: 20px; margin-top: 10px"
-    >
+    <el-icon @click="refreshBookmarks" class="icon-style">
       <Refresh />
     </el-icon>
   </el-row>
@@ -201,6 +195,16 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
+$white-color: #fff;
+$icon-margin-right: 20px;
+$icon-margin-top: 10px;
+
+.icon-style {
+  color: $white-color;
+  margin-right: $icon-margin-right;
+  margin-top: $icon-margin-top;
+}
+
 .box-wrapper {
   width: 100%;
 }
